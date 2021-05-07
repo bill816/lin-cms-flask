@@ -12,6 +12,7 @@ def create_cms():
     cms = Blueprint("cms", __name__)
     from .admin import admin_api
     from .file import file_api
+    from .sign_file import sign_file_api
     from .log import log_api
     from .user import user_api
 
@@ -19,4 +20,5 @@ def create_cms():
     user_api.register(cms)
     log_api.register(cms)
     file_api.register(cms)
+    sign_file_api.register(cms)
     return cms

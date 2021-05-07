@@ -15,6 +15,8 @@ file_api = Redprint("file")
 @login_required
 def post_file():
     files = request.files
+    print("1. cms/file post file function")
     uploader = LocalUploader(files)
     ret = uploader.upload()
+    print("2. cms file end post file function")
     return ret

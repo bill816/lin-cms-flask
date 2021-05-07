@@ -91,4 +91,6 @@ if __name__ == "__main__":
         ----------------------------
         """
     )
+    app.debug = True
+    print('start flask server')
     app.run()
