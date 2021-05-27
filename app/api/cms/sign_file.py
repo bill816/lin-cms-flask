@@ -6,6 +6,7 @@ from flask import request
 from lin.jwt import login_required
 from lin.redprint import Redprint
 from flask import current_app
+import time
 from app.extension.file.local_uploader import LocalUploader
 import os
 
@@ -13,11 +14,11 @@ import os
 
 _d,_f=os.path.split(os.path.realpath(__file__))
 
-ROOT_PATH ='../../'+ _d + '/sign_assert/'
+ROOT_PATH = _d + '/sign_assert/'
 
-# TODO 判断处理路径问题
-UPLOAD_FOLDER = 'uploads/'
-DOWNLOAD_FOLDER = 'downloads/
+UPLOAD_FOLDER = ROOT_PATH + 'uploads/'
+DOWNLOAD_FOLDER = ROOT_PATH + 'downloads/'
+LIB64_PATH = ROOT_PATH + 'lib64/'
 
 #print ('downloads/%s/apk_sign/') % ('n5s')
 COPY_APK_SIGN_PATH = ROOT_PATH + 'downloads/%sapk_sign/'
@@ -25,6 +26,7 @@ COPY_OTA_SIGN_PATH = ROOT_PATH + 'downloads/%sota_sign/'
 COPY_DOWN_UPGRADE_PATH = ROOT_PATH + 'downloads/%s/down_upgrade/'
 COPY_SPLASH_PATH = ROOT_PATH + 'downloads/splash/'
 
+print(ROOT_PATH)
 
 ##############################function###########################
 def get_host_ip():
@@ -125,8 +127,8 @@ def sign_ota(ota_path,dev_type):
     dev_type = ROOT_PATH + dev_type
 
 
-    cmd = ('/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -Xmx2048m -Djava.library.path=%slib64 -jar %ssignapk.jar -w %sreleasekey.x509.pem %sreleasekey.pk8 ' \
-            +  ota_path + ' ' + cp_ota_path) % (dev_type,dev_type,dev_type,dev_type)
+    cmd = ('/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -Xmx2048m -Djava.library.path=%s/../lib64 -jar %ssignapk.jar -w %sreleasekey.x509.pem %sreleasekey.pk8 ' \
+            +  ota_path + ' ' + cp_ota_path) % (LIB64_PATH,dev_type,dev_type,dev_type)
 
     if os_type == 5:
         cmd = ('java -Xmx2048m -jar %ssignapk.jar -w  %sreleasekey.x509.pem  %sreleasekey.pk8 ' +  ota_path + ' ' + cp_ota_path) % (dev_type,dev_type,dev_type)
@@ -141,12 +143,12 @@ def sign_ota(ota_path,dev_type):
 ##############################route functions##############################
 
 def do_ota_sign(file_name,desc):
-    file_path =  app.config['UPLOAD_FOLDER'] + desc + file_name
+    file_path =  UPLOAD_FOLDER + desc + file_name
     print ('start do_zip_sign:' + file_path)
     return sign_ota(file_path,desc)
 
 def do_down_update(file_name,desc):
-    file_path =  app.config['UPLOAD_FOLDER'] + file_name
+    file_path =  UPLOAD_FOLDER + file_name
     zip_fold = unpack(file_path)
 
     print (zip_fold)
@@ -160,7 +162,7 @@ def do_down_update(file_name,desc):
 
 
 def do_apk_sign(file_name,desc):
-    file_path =  app.config['UPLOAD_FOLDER'] + desc + file_name
+    file_path =  UPLOAD_FOLDER + desc + file_name
     print ('start do_apk_sign:' + file_path)
     return sign_apk(file_path,desc)
 
@@ -175,7 +177,7 @@ def do_tms_ota(file_name,desc):
 
 def do_logo_gen(file_name,desc):
 
-	file_path =  app.config['UPLOAD_FOLDER'] + desc + file_name
+	file_path =  UPLOAD_FOLDER + desc + file_name
 	des_path = COPY_SPLASH_PATH + "splash_" + get_current_time() + ".img"
 	my_makedirs(COPY_SPLASH_PATH)
 	print (file_path)
@@ -206,5 +208,14 @@ def post_file():
     uploader = LocalUploader(files)
     ret = uploader.upload()
     print("2. cms file end post file function:" + str(ret))
-    result_path = route_function(option,ret[0]['path'],op_type)
+    path_str =  ret[0]['path']
+    (path, filename) = os.path.split(path_str)
+    
+    my_makedirs(UPLOAD_FOLDER + op_type)
+
+    cmd = 'cp ' + _d + '/../../../assets/' + path_str + ' ' + UPLOAD_FOLDER + op_type
+    os.system(cmd)
+
+    #TODO 整理代码，如何拷贝到下载目录
+    result_path = route_function(option,filename,op_type)
     return ret
