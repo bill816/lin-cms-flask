@@ -26,7 +26,7 @@ class LocalUploader(Uploader):
             single.seek(0)
             exists = File.select_by_md5(file_md5)
             if exists:
-                print('2. exists the file')
+                print('2. local_uploader exists the file')
                 ret.append(
                     {
                         "key": single.name,
@@ -37,7 +37,7 @@ class LocalUploader(Uploader):
                     }
                 )
             else:
-                print('3. not exists the file')
+                print('3. local_uploader not exists the file')
                 absolute_path, relative_path, real_name = self._get_store_path(
                     single.filename
                 )

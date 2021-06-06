@@ -207,6 +207,7 @@ def post_file():
     print("1. cms/file post file function")
     uploader = LocalUploader(files)
     ret = uploader.upload()
+
     print("2. cms file end post file function:" + str(ret))
     path_str =  ret[0]['path']
     (path, filename) = os.path.split(path_str)
@@ -214,8 +215,33 @@ def post_file():
     my_makedirs(UPLOAD_FOLDER + op_type)
 
     cmd = 'cp ' + _d + '/../../../assets/' + path_str + ' ' + UPLOAD_FOLDER + op_type
+    print('3.cp cmd' + cmd)
     os.system(cmd)
 
-    #TODO 整理代码，如何拷贝到下载目录
+    print('3.1 run function')
     result_path = route_function(option,filename,op_type)
+
+    #拷贝到下载目录,并返回到前端
+    (path, filename) = os.path.split(result_path)
+    cp_signed_path =  _d + '/../../../assets/' + op_type 
+    print('3.2. cp_signed_path:' + cp_signed_path)
+    my_makedirs(cp_signed_path)
+    cmd = 'cp ' + result_path + ' ' +  cp_signed_path + filename 
+    print('4. cp cmd:' + cmd)
+    os.system(cmd)
+
+
+    # 把签名好的路径返回给前端
+    ret[0]['path'] = "/assets/" + op_type + filename
+    site_domain = current_app.config.get(
+            "SITE_DOMAIN",
+            "http://{host}:{port}".format(
+                host=current_app.config.get("FLASK_RUN_HOST", "127.0.0.1"),
+                port=current_app.config.get("FLASK_RUN_PORT", "5000"),
+            ),
+        )
+    ret[0]['url'] = site_domain + ret[0]['path']
+
+    print('4. return value:' + str(ret))
+
     return ret
