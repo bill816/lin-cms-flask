@@ -6,6 +6,11 @@ from flask import request
 from lin.jwt import login_required
 from lin.redprint import Redprint
 from flask import current_app
+from lin.logger import Log, Logger
+from lin import manager, permission_meta
+from flask_jwt_extended import (
+    get_current_user,
+)
 import time
 from app.extension.file.local_uploader import LocalUploader
 import os
@@ -211,6 +216,18 @@ def post_file():
     print("2. cms file end post file function:" + str(ret))
     path_str =  ret[0]['path']
     (path, filename) = os.path.split(path_str)
+
+    user = get_current_user()
+    Log.create_log(
+        message=f"{user.username}上传了待签名文件:" + filename + "机型：" + op_type + "类型:" + option,
+        user_id=user.id,
+        username=user.username,
+        status_code=200,
+        method="post",
+        path="/cms/sign_file",
+        permission="",
+        commit=True,
+    )
     
     my_makedirs(UPLOAD_FOLDER + op_type)
 
