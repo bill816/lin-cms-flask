@@ -232,7 +232,7 @@ def post_file():
     my_makedirs(UPLOAD_FOLDER + op_type)
 
     cmd = 'cp ' + _d + '/../../../assets/' + path_str + ' ' + UPLOAD_FOLDER + op_type
-    print('3.cp cmd' + cmd)
+    print('3.cp cmd:' + cmd)
     os.system(cmd)
 
     print('3.1 run function')
